@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+BIN=blink
+OUTDIR=target/thumbv7em-none-eabihf/release
+HEX=$OUTDIR/$BIN.hex
+ELF=$OUTDIR/$BIN
+
+cargo build --release
+cargo objcopy --release -- -O ihex $HEX
+#teensy_loader_cli -w -mmcu=mk66fx1m0 $HEX -v

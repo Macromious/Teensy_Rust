@@ -9,6 +9,10 @@ use core::panic::PanicInfo;
 
 // we also need to include all of our chip access files
 mod port;
+mod gpio;
+
+use crate::port::Port;
+use crate::gpio::GPIO;
 
 // we define our reset function that will run whenever the chip is reset. the no_mangle 
 // directive tells the compiler to ensure the symbol defined for the function does not change.
@@ -16,17 +20,10 @@ mod port;
 // reset vector to this function
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn Reset() -> ! {
-    // in our reset function, we will simply define and then run our main function. this
+    // in our reset function, we will simply run our main function. this
     // must be declared unsafe, as the compiler cannot complete borrow checking on external
     // functions
-    unsafe extern "Rust" {
-        unsafe fn main() -> !;
-    }
-
-    // this is where we call our main function
-    unsafe {
-        main();
-    }
+    main();
 
     // if main exits, we want to loop to prevent further execution
     loop {}
@@ -60,4 +57,22 @@ fn panic(_panic: &PanicInfo<'_>) -> ! {
     loop{}
 }
 
-// Now all the setup is complete, we can write our main function for execution
+// with all the setup complete, we can define our main function and begin writing our program
+pub extern "C" fn main() -> () {
+    // lets start by attempting to define port C to access the onboard LED
+    let port_c: *mut Port = Port::new('C');
+    // next we can define our GPIO
+    let gpio_c: *mut GPIO = GPIO::new('C');
+    // now we can set our pin to gpio. for the onboard LED, this is pin 5
+    unsafe {
+        (*port_c).enable_gpio(5);
+    }
+
+    // with GPIO enabled on our pin, we can now try to turn on the LED 
+    unsafe {
+        // first set the gpio direction
+        (*gpio_c).set_dir(5, 1);
+        // then set the output to high
+        (*gpio_c).set_output(5, 1);
+    }
+}

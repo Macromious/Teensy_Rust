@@ -5,3 +5,4 @@ authors = ["Matthew Cantrill"]
 edition = "2024"
 
 [dependencies]
+volatile-register = "0.2.2"

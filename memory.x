@@ -4,7 +4,7 @@ addressed, as well as it's size. for our initial layout, we allowing access
 to the entire flash memory and ram
 */
 MEMORY {
-    FLASH (rx) : ORIGIN = 0x00000000, Length = 1M
+    FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 1M
     RAM (rwx) : ORIGIN = 0x1FFF0000, LENGTH = 256K
 }
 
