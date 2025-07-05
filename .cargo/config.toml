@@ -1,5 +1,10 @@
+# the build section can be used to define additional arguments
+# when 'cargo build' is run
 [build]
 target = "thumbv7em-none-eabihf"
 
+# the target.x header allows definitions for additional arguments
+# when a given target is defined for a 'cargo build' call
+# in this case, the linker script is included for compilation
 [target.thumbv7em-none-eabihf]
 rustflags = ["-C", "link-arg=-Tmemory.x"]
