@@ -2,7 +2,7 @@
 name = "Teensy_Rust"
 version = "0.1.0"
 authors = ["Matthew Cantrill"]
-edition = "2024"
+edition = "2018"
 
 [dependencies]
 volatile-register = "0.2.2"

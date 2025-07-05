@@ -10,30 +10,33 @@ use core::panic::PanicInfo;
 // we also need to include all of our chip access files
 mod port;
 mod gpio;
-
-use crate::port::Port;
-use crate::gpio::GPIO;
+mod sim;
+//mod watchdog;
 
 // we define our reset function that will run whenever the chip is reset. the no_mangle 
 // directive tells the compiler to ensure the symbol defined for the function does not change.
 // In this case, our symbol will be called reset, and we can then use this to point our
 // reset vector to this function
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn Reset() -> ! {
-    // in our reset function, we will simply run our main function. this
-    // must be declared unsafe, as the compiler cannot complete borrow checking on external
-    // functions
-    main();
+// #[unsafe(no_mangle)]
+// pub unsafe extern "C" fn Reset() -> ! {
+//     // in our reset function, we will simply run our main function. this
+//     // must be declared unsafe, as the compiler cannot complete borrow checking on external
+//     // functions
+//     main();
 
-    // if main exits, we want to loop to prevent further execution
-    loop {}
+//     // if main exits, we want to loop to prevent further execution
+//     loop {}
+// }
+
+unsafe extern "C" {
+    fn _stack_top();
 }
 
-// wwe must also define the reset vector in order to tell the compiler where our entry point will
+// we must also define the reset vector in order to tell the compiler where our entry point will
 // be
-#[unsafe(link_section = ".reset_vector")]
+#[unsafe(link_section = ".reset_vectors")]
 #[unsafe(no_mangle)]
-pub static RESET_VECTOR: unsafe extern "C" fn() -> ! = Reset;
+pub static _RESET_VECTOR: [unsafe extern "C" fn(); 2] = [_stack_top, main];
 
 // we also need to define our flash config. This is done by referencing the 16 byte values in the
 // cortex datasheet. The layout is as follows
@@ -47,32 +50,42 @@ pub static RESET_VECTOR: unsafe extern "C" fn() -> ! = Reset;
 // also be set to 0xFF
 #[unsafe(link_section = ".flashconfig")]
 #[unsafe(no_mangle)]
-pub static FLASH_CONFIG: [u8; 16] = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF];
+pub static _FLASH_CONFIG: [u8; 16] = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xDE, 0xF9, 0xFF, 0xFF];
 
 // The panic_handler directive tells the compiler the function to run when a panic occurs.
 // In this case, as we have no way to alert the user currently, we can simple make the program
 // enter an endless loop to prevent further execution of the program
 #[panic_handler]
-fn panic(_panic: &PanicInfo<'_>) -> ! {
+fn panic(_panic: &PanicInfo) -> ! {
     loop{}
 }
 
 // with all the setup complete, we can define our main function and begin writing our program
-pub extern "C" fn main() -> () {
-    // lets start by attempting to define port C to access the onboard LED
-    let port_c: *mut Port = Port::new('C');
-    // next we can define our GPIO
-    let gpio_c: *mut GPIO = GPIO::new('C');
+#[unsafe(no_mangle)]
+pub extern "C" fn main() {
+    // first we need to define our SIM block
+    // let sim: *mut sim::SIM = sim::SIM::new();
+    // // lets start by attempting to define port C to access the onboard LED
+    // let port_c: *mut port::Port = port::Port::new(port::PortName::C);
+    // // next we can define our GPIO
+    // let gpio_c: *mut gpio::GPIO = gpio::GPIO::new(gpio::PortName::C);
+
+    let sim: &mut sim::SIM = sim::SIM::new();
+    let port_c: &mut port::Port = port::Port::new(port::_PortName::C);
+    let gpio_c: &mut gpio::GPIO = gpio::GPIO::new(gpio::_PortName::C);
+
+    // next we enable the clock gating for port C
+    (*sim).cg5_control(sim::PortName::C);
+
     // now we can set our pin to gpio. for the onboard LED, this is pin 5
-    unsafe {
-        (*port_c).enable_gpio(5);
-    }
+    (*port_c).enable_gpio(5);
 
     // with GPIO enabled on our pin, we can now try to turn on the LED 
-    unsafe {
-        // first set the gpio direction
-        (*gpio_c).set_dir(5, 1);
-        // then set the output to high
-        (*gpio_c).set_output(5, 1);
-    }
+    // first set the gpio direction
+    (*gpio_c).set_dir(5, 1);
+    // then set the output to high
+    (*gpio_c).set_output(5, true);
+
+
+    loop {}
 }

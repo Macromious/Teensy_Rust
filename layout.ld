@@ -26,8 +26,8 @@ SECTIONS {
         in main.rs
         */
         . = 0;
-        LONG(ORIGIN(RAM) + LENGTH(RAM))
-        KEEP(*(.reset_vector))
+        /*LONG(ORIGIN(RAM) + LENGTH(RAM))*/
+        KEEP(*(.reset_vectors))
         /*
         The next section we need to describe is the flash config. The cortex processor
         has a 16 byte flash configuration stored at 0x0000_0400. This describes any 
@@ -59,6 +59,8 @@ SECTIONS {
     all rodata should be stored in flash for permanence. this can be read to ram as needed
     */
     } > FLASH
+
+    _stack_top = ORIGIN(RAM) + LENGTH(RAM);
 
     /*
     The /DISCARD/ section simply tells the compiler not to include this data in the final 
