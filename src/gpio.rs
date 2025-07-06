@@ -34,22 +34,22 @@ impl GPIO {
 
     // next we can implement a function to set the pin to either input or output
     // this needs to set the register bit to 1 for output, and 0 for input
-    pub fn set_dir(&mut self, _pin_id: usize, _dir: usize) -> () {
+    pub fn set_dir(&mut self, pin_id: usize, _dir: bool) -> () {
         // first we read the register
         unsafe {
             let value = ptr::read_volatile(&((*self).pddr));
-            let mask = 1 << 5;
+            let mask = 1 << pin_id;
             ptr::write_volatile(&mut (*self).pddr, value | mask);
         };
     }
 
     // last thing to implement for now is setting the output value high or low
-    pub fn set_output(&mut self, _pin_id: usize, _out_val: bool) -> () {
+    pub fn set_output(&mut self, pin_id: usize, _out_val: bool) -> () {
         // this will be very similar to the set_dir function
         // first we read the register
         unsafe {
             let value = ptr::read_volatile(&((*self).pdor));
-            let mask = 1 << 5;
+            let mask = 1 << pin_id;
             ptr::write_volatile(&mut (*self).pdor, value | mask);
         };
     }

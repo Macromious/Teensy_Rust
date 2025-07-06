@@ -77,15 +77,22 @@ pub extern "C" fn main() {
     // next we enable the clock gating for port C
     (*sim).cg5_control(sim::PortName::C);
 
-    // now we can set our pin to gpio. for the onboard LED, this is pin 5
+    // now we can set our pin to gpio. for the onboard LED, this is pin 13, which 
+    // corresponds to portc_5
     (*port_c).enable_gpio(5);
+    // define pin 12 as portc_7
+    (*port_c).enable_gpio(7);
 
     // with GPIO enabled on our pin, we can now try to turn on the LED 
     // first set the gpio direction
-    (*gpio_c).set_dir(5, 1);
+    (*gpio_c).set_dir(5, true);
     // then set the output to high
     (*gpio_c).set_output(5, true);
 
+    // repeat the gpio output steps for pin 12
+    (*gpio_c).set_dir(7, true);
+    // then set the output to high
+    (*gpio_c).set_output(7, true);
 
     loop {}
 }
