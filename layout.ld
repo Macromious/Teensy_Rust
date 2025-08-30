@@ -26,8 +26,8 @@ SECTIONS {
         in main.rs
         */
         . = 0;
-        /*LONG(ORIGIN(RAM) + LENGTH(RAM))*/
         KEEP(*(.reset_vectors))
+        KEEP(*(.exception_vectors))
         /*
         The next section we need to describe is the flash config. The cortex processor
         has a 16 byte flash configuration stored at 0x0000_0400. This describes any 
@@ -48,7 +48,7 @@ SECTIONS {
     value is chosen as Flash is erased to 0xFF and then writing will flip the required 
     bits as needed to reduce the number of writes to the flash.
     */
-    } > FLASH = 0xFF
+    } > FLASH = 0xFFFFFFFF
 
     /*
     The rodata section describes all the data that is read only and will not be changed

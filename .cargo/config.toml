@@ -7,4 +7,4 @@ target = "thumbv7em-none-eabihf"
 # when a given target is defined for a 'cargo build' call
 # in this case, the linker script is included for compilation
 [target.thumbv7em-none-eabihf]
-rustflags = ["-C", "link-arg=-Tlayout.ld"]
+rustflags = ["-C", "link-arg=-Tlayout.ld", "-C", "debuginfo=2"]
